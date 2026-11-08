@@ -8,7 +8,7 @@
 # installation is left alone.
 
 x-node: &node
-  image: node:24-alpine
+  image: node:25-alpine
   working_dir: /app
   volumes:
     - .:/app
