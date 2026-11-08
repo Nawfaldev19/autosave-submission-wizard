@@ -1,0 +1,723 @@
+"""
+Optimistic concurrency: the submission changed since the version the client sent.
+"""
+type ConflictError implements Error {
+  """The version now stored."""
+  currentVersion: Int!
+
+  """A sentence for the person using the app."""
+  message: String!
+}
+
+"""A calendar date, YYYY-MM-DD, with no time zone."""
+scalar Date
+
+"""An instant, as an ISO 8601 string in UTC. Output only."""
+scalar DateTime
+
+"""Any subset of draft fields. Omitted fields are left unchanged."""
+input DraftInput {
+  """Short biography (20 to 600 characters)."""
+  bio: String
+
+  """The kind of work."""
+  form: Form
+
+  """Optional pen name (up to 80 characters)."""
+  penName: String
+
+  """The author holds the rights to the work."""
+  rightsConfirmed: Boolean
+
+  """Optional timing note (up to 400 characters)."""
+  scheduleNote: String
+
+  """The publishing list asked for."""
+  season: Season
+
+  """What it is about (50 to 2,000 characters)."""
+  synopsis: String
+
+  """Whether the work is tied to a date."""
+  timeSensitive: Boolean
+
+  """The work’s title (1 to 120 characters)."""
+  title: String
+
+  """Length in words (500 to 120,000)."""
+  wordCount: Int
+}
+
+"""
+An expected failure. Every member of a result union except the success type implements it.
+"""
+interface Error {
+  """A sentence for the person using the app."""
+  message: String!
+}
+
+"""One invalid input field."""
+type FieldProblem {
+  """The input field’s name, as sent."""
+  field: String!
+
+  """What is wrong with it."""
+  message: String!
+}
+
+"""A file sent with the GraphQL multipart request specification."""
+scalar File
+
+"""The viewer’s role cannot do this."""
+type ForbiddenError implements Error {
+  """A sentence for the person using the app."""
+  message: String!
+}
+
+"""The kind of work."""
+enum Form {
+  """A poetry chapbook of up to 40 pages."""
+  CHAPBOOK
+
+  """A short-story collection."""
+  COLLECTION
+
+  """A long-form essay."""
+  ESSAY
+}
+
+"""The draft cannot be submitted yet."""
+type IncompleteSubmissionError implements Error {
+  """Everything still missing, in wizard order."""
+  issues: [ReadinessIssue!]!
+
+  """A sentence for the person using the app."""
+  message: String!
+}
+
+"""The email and password do not match an account."""
+type InvalidCredentialsError implements Error {
+  """A sentence for the person using the app."""
+  message: String!
+}
+
+"""
+The workflow does not allow this change from the current status, by this person.
+"""
+type InvalidTransitionError implements Error {
+  """A sentence for the person using the app."""
+  message: String!
+
+  """The submission’s status when the change was refused."""
+  status: String!
+}
+
+"""A save touched fields that are locked after acceptance."""
+type LockedFieldError implements Error {
+  """The locked fields the save tried to change."""
+  fields: [String!]!
+
+  """A sentence for the person using the app."""
+  message: String!
+}
+
+"""An uploaded manuscript file."""
+type Manuscript {
+  """Same-origin path that serves the file to its author and to editors."""
+  downloadUrl: String!
+
+  """The original name, cleaned for display. Never a path."""
+  fileName: String!
+
+  """Stable identifier."""
+  id: ID!
+
+  """`application/pdf` or `text/plain`, decided from the file’s content."""
+  mediaType: String!
+
+  """Size in bytes (at most 5 MB)."""
+  sizeBytes: Int!
+}
+
+"""
+Writes. Every request needs the x-submission-wizard-csrf header; expected failures come back in result unions.
+"""
+type Mutation {
+  """
+  The claiming editor: accepts with a release date and messages the author.
+  """
+  acceptSubmission(
+    """The submission’s id."""
+    id: ID!
+
+    """
+    Release date in the press’s time zone, 30 days to two years from today.
+    """
+    releaseDate: Date!
+  ): MutationAcceptSubmissionResult!
+
+  """
+  Editors: takes a waiting submission into review; of two editors claiming at once, one wins.
+  """
+  claimSubmission(
+    """The submission’s id."""
+    id: ID!
+
+    """
+    Optional. The version the client last saw; a mismatch returns ConflictError.
+    """
+    version: Int
+  ): MutationClaimSubmissionResult!
+
+  """Authors: starts a new draft from any subset of fields."""
+  createDraft(
+    """The fields to set."""
+    input: DraftInput!
+  ): MutationCreateDraftResult!
+
+  """The claiming editor: declines with a note, which the author receives."""
+  declineSubmission(
+    """The submission’s id."""
+    id: ID!
+
+    """A note for the author (10 to 2,000 characters after trimming)."""
+    note: String!
+  ): MutationDeclineSubmissionResult!
+
+  """
+  Authors: starts a new draft from one of their submissions (text fields only, no file).
+  """
+  duplicateSubmission(
+    """The submission to copy."""
+    id: ID!
+  ): MutationDuplicateSubmissionResult!
+
+  """
+  Marks all of the viewer’s notifications as read and returns how many changed.
+  """
+  markNotificationsRead: MutationMarkNotificationsReadResult!
+
+  """
+  Authors: turns a declined submission back into a draft, keeping its text.
+  """
+  reviseSubmission(
+    """The submission’s id."""
+    id: ID!
+
+    """
+    Optional. The version the client last saw; a mismatch returns ConflictError.
+    """
+    version: Int
+  ): MutationReviseSubmissionResult!
+
+  """
+  Authors: saves fields of a draft, or the editable fields of an accepted submission.
+  """
+  saveDraft(
+    """The submission’s id."""
+    id: ID!
+
+    """The fields to change."""
+    input: DraftInput!
+
+    """The version the client last saw; a mismatch returns ConflictError."""
+    version: Int!
+  ): MutationSaveDraftResult!
+
+  """
+  Signs in and sets the HTTP-only session cookie. Rate-limited per client, per client and email, and per email.
+  """
+  signIn(
+    """Account email; case and surrounding spaces are ignored."""
+    email: String!
+
+    """Account password."""
+    password: String!
+  ): MutationSignInResult!
+
+  """
+  Ends every session of the viewer, on every device, and clears the cookie.
+  """
+  signOut: Boolean!
+
+  """
+  Authors: sends a complete draft to the press. Refused with IncompleteSubmissionError while anything is missing.
+  """
+  submitSubmission(
+    """The submission’s id."""
+    id: ID!
+
+    """The version the client last saw; a mismatch returns ConflictError."""
+    version: Int!
+  ): MutationSubmitSubmissionResult!
+
+  """
+  Authors: attaches a PDF or UTF-8 text manuscript (up to 5 MB) to a draft, replacing any earlier one.
+  """
+  uploadManuscript(
+    """The manuscript, sent as a multipart file."""
+    file: File!
+
+    """The submission’s id."""
+    id: ID!
+
+    """The version the client last saw; a mismatch returns ConflictError."""
+    version: Int!
+  ): MutationUploadManuscriptResult!
+
+  """Authors: takes a submission that no editor has claimed back to draft."""
+  withdrawSubmission(
+    """The submission’s id."""
+    id: ID!
+
+    """The version the client last saw; a mismatch returns ConflictError."""
+    version: Int!
+  ): MutationWithdrawSubmissionResult!
+}
+
+"""
+The result of acceptSubmission: the success type, or one of the expected errors.
+"""
+union MutationAcceptSubmissionResult = ConflictError | ForbiddenError | InvalidTransitionError | MutationAcceptSubmissionSuccess | NotFoundError | NotSignedInError | ValidationError
+
+"""acceptSubmission succeeded; `data` holds the result."""
+type MutationAcceptSubmissionSuccess {
+  """The accepted submission."""
+  data: Submission!
+}
+
+"""
+The result of claimSubmission: the success type, or one of the expected errors.
+"""
+union MutationClaimSubmissionResult = ConflictError | ForbiddenError | InvalidTransitionError | MutationClaimSubmissionSuccess | NotFoundError | NotSignedInError | ValidationError
+
+"""claimSubmission succeeded; `data` holds the result."""
+type MutationClaimSubmissionSuccess {
+  """The submission in its new status."""
+  data: Submission!
+}
+
+"""
+The result of createDraft: the success type, or one of the expected errors.
+"""
+union MutationCreateDraftResult = ConflictError | ForbiddenError | InvalidTransitionError | MutationCreateDraftSuccess | NotFoundError | NotSignedInError | ValidationError
+
+"""createDraft succeeded; `data` holds the result."""
+type MutationCreateDraftSuccess {
+  """The new draft (version 1)."""
+  data: Submission!
+}
+
+"""
+The result of declineSubmission: the success type, or one of the expected errors.
+"""
+union MutationDeclineSubmissionResult = ConflictError | ForbiddenError | InvalidTransitionError | MutationDeclineSubmissionSuccess | NotFoundError | NotSignedInError | ValidationError
+
+"""declineSubmission succeeded; `data` holds the result."""
+type MutationDeclineSubmissionSuccess {
+  """The declined submission."""
+  data: Submission!
+}
+
+"""
+The result of duplicateSubmission: the success type, or one of the expected errors.
+"""
+union MutationDuplicateSubmissionResult = ConflictError | ForbiddenError | InvalidTransitionError | MutationDuplicateSubmissionSuccess | NotFoundError | NotSignedInError | ValidationError
+
+"""duplicateSubmission succeeded; `data` holds the result."""
+type MutationDuplicateSubmissionSuccess {
+  """The new draft."""
+  data: Submission!
+}
+
+"""
+The result of markNotificationsRead: the success type, or one of the expected errors.
+"""
+union MutationMarkNotificationsReadResult = MutationMarkNotificationsReadSuccess | NotSignedInError
+
+"""markNotificationsRead succeeded; `data` holds the result."""
+type MutationMarkNotificationsReadSuccess {
+  """How many notifications changed."""
+  data: Int!
+}
+
+"""
+The result of reviseSubmission: the success type, or one of the expected errors.
+"""
+union MutationReviseSubmissionResult = ConflictError | ForbiddenError | InvalidTransitionError | MutationReviseSubmissionSuccess | NotFoundError | NotSignedInError | ValidationError
+
+"""reviseSubmission succeeded; `data` holds the result."""
+type MutationReviseSubmissionSuccess {
+  """The submission in its new status."""
+  data: Submission!
+}
+
+"""
+The result of saveDraft: the success type, or one of the expected errors.
+"""
+union MutationSaveDraftResult = ConflictError | ForbiddenError | InvalidTransitionError | LockedFieldError | MutationSaveDraftSuccess | NotFoundError | NotSignedInError | ValidationError
+
+"""saveDraft succeeded; `data` holds the result."""
+type MutationSaveDraftSuccess {
+  """The saved submission with its new version."""
+  data: Submission!
+}
+
+"""The result of signIn: the success type, or one of the expected errors."""
+union MutationSignInResult = InvalidCredentialsError | MutationSignInSuccess | ValidationError
+
+"""signIn succeeded; `data` holds the result."""
+type MutationSignInSuccess {
+  """The signed-in user."""
+  data: User!
+}
+
+"""
+The result of submitSubmission: the success type, or one of the expected errors.
+"""
+union MutationSubmitSubmissionResult = ConflictError | ForbiddenError | IncompleteSubmissionError | InvalidTransitionError | MutationSubmitSubmissionSuccess | NotFoundError | NotSignedInError | ValidationError
+
+"""submitSubmission succeeded; `data` holds the result."""
+type MutationSubmitSubmissionSuccess {
+  """The submission in its new status."""
+  data: Submission!
+}
+
+"""
+The result of uploadManuscript: the success type, or one of the expected errors.
+"""
+union MutationUploadManuscriptResult = ConflictError | ForbiddenError | InvalidTransitionError | MutationUploadManuscriptSuccess | NotFoundError | NotSignedInError | UploadRejectedError | ValidationError
+
+"""uploadManuscript succeeded; `data` holds the result."""
+type MutationUploadManuscriptSuccess {
+  """The draft with its new manuscript and version."""
+  data: Submission!
+}
+
+"""
+The result of withdrawSubmission: the success type, or one of the expected errors.
+"""
+union MutationWithdrawSubmissionResult = ConflictError | ForbiddenError | InvalidTransitionError | MutationWithdrawSubmissionSuccess | NotFoundError | NotSignedInError | ValidationError
+
+"""withdrawSubmission succeeded; `data` holds the result."""
+type MutationWithdrawSubmissionSuccess {
+  """The submission in its new status."""
+  data: Submission!
+}
+
+"""
+The record does not exist, or the viewer may not see it (the two are not distinguished).
+"""
+type NotFoundError implements Error {
+  """A sentence for the person using the app."""
+  message: String!
+}
+
+"""The operation needs a signed-in user."""
+type NotSignedInError implements Error {
+  """A sentence for the person using the app."""
+  message: String!
+}
+
+"""An in-app message to an author about a decision."""
+type Notification {
+  """Plain text; paragraphs are separated by blank lines."""
+  body: String!
+
+  """When it was sent."""
+  createdAt: DateTime!
+
+  """Stable identifier."""
+  id: ID!
+
+  """When it was marked read; null while unread."""
+  readAt: DateTime
+
+  """One-line summary."""
+  subject: String!
+
+  """The submission it is about."""
+  submissionId: ID!
+}
+
+"""Where a page of a keyset-paginated list ends."""
+type PageInfo {
+  """Pass as `after` to read the next page; null for an empty page."""
+  endCursor: String
+
+  """Whether older records follow."""
+  hasNextPage: Boolean!
+}
+
+"""The publisher running this instance."""
+type Press {
+  """The press’s name."""
+  name: String!
+
+  """The IANA time zone release dates are judged in."""
+  timeZone: String!
+
+  """Today's date in the press's time zone."""
+  today: Date!
+}
+
+"""
+Reads. Anonymous callers get nulls or empty lists rather than errors, except where noted.
+"""
+type Query {
+  """The signed-in user, or null."""
+  me: User
+
+  """The viewer’s own submissions, most recently changed first."""
+  mySubmissions: [Submission!]!
+
+  """The viewer’s 50 most recent messages, newest first."""
+  notifications: [Notification!]!
+
+  """The press’s name, time zone and today’s date there. Public."""
+  press: Press!
+
+  """Editors only: submitted work, newest first, with keyset pagination."""
+  reviewQueue(
+    """The `endCursor` of the previous page."""
+    after: String
+
+    """Page size, clamped to 1–50."""
+    first: Int = 10
+
+    """Only these statuses; omitted or empty means every status except DRAFT."""
+    statuses: [SubmissionStatus!]
+  ): QueryReviewQueueResult!
+
+  """
+  One submission the viewer may see (their own; editors also see non-drafts), or null.
+  """
+  submission(
+    """The submission’s id."""
+    id: ID!
+  ): Submission
+}
+
+"""
+The result of reviewQueue: the success type, or one of the expected errors.
+"""
+union QueryReviewQueueResult = ForbiddenError | NotSignedInError | QueryReviewQueueSuccess | ValidationError
+
+"""reviewQueue succeeded; `data` holds the result."""
+type QueryReviewQueueSuccess {
+  """The requested page."""
+  data: QueuePage!
+}
+
+"""One page of the editors’ queue, newest submission first."""
+type QueuePage {
+  """The submissions on this page."""
+  nodes: [Submission!]!
+
+  """How to continue."""
+  pageInfo: PageInfo!
+}
+
+"""One thing still missing before a draft can be submitted."""
+type ReadinessIssue {
+  """The field to fix; `file` is the manuscript upload."""
+  field: String!
+
+  """What the author should do."""
+  message: String!
+
+  """The wizard step that holds the field."""
+  step: Step!
+}
+
+"""What kind of account a user has."""
+enum Role {
+  """Prepares and submits their own work, and reads decisions about it."""
+  AUTHOR
+
+  """
+  Works through the queue: claims submissions and accepts or declines them.
+  """
+  EDITOR
+}
+
+"""The publishing list a submission is considered for."""
+enum Season {
+  """The autumn list."""
+  AUTUMN
+
+  """Either list; the press chooses."""
+  EITHER
+
+  """The spring list."""
+  SPRING
+}
+
+"""A step of the submission wizard; the value is the URL segment."""
+enum Step {
+  """Step 4: About you."""
+  about
+
+  """Step 1: Basics."""
+  basics
+
+  """Step 2: Manuscript."""
+  manuscript
+
+  """Step 5: Review and submit."""
+  review
+
+  """Step 3: Schedule."""
+  schedule
+}
+
+"""A piece of work moving through the workflow, from draft to decision."""
+type Submission {
+  """Who wrote it."""
+  author: User!
+
+  """
+  The status changes the viewer’s role could make now. The server checks again on each change.
+  """
+  availableActions: [WorkflowAction!]!
+
+  """Short biography (20 to 600 characters)."""
+  bio: String
+
+  """The editor’s note to the author, when declined."""
+  decisionNote: String
+
+  """The editor who claimed it, once in review."""
+  editor: User
+
+  """The kind of work."""
+  form: Form
+
+  """Stable identifier."""
+  id: ID!
+
+  """
+  Fields that can no longer change. After acceptance, all but a few are locked; `file` is the manuscript.
+  """
+  lockedFields: [String!]!
+
+  """The uploaded manuscript, if any."""
+  manuscript: Manuscript
+
+  """Optional pen name (up to 80 characters)."""
+  penName: String!
+
+  """What is still missing before this draft can be submitted."""
+  readiness: [ReadinessIssue!]!
+
+  """The planned release date, when accepted."""
+  releaseDate: Date
+
+  """The author confirmed they hold the rights to the work."""
+  rightsConfirmed: Boolean!
+
+  """Optional timing note (up to 400 characters)."""
+  scheduleNote: String!
+
+  """The publishing list asked for."""
+  season: Season
+
+  """Where it is in the workflow."""
+  status: SubmissionStatus!
+
+  """When it was last submitted; null for drafts."""
+  submittedAt: DateTime
+
+  """What it is about (50 to 2,000 characters)."""
+  synopsis: String
+
+  """Whether the work is tied to a date (an anniversary, say)."""
+  timeSensitive: Boolean!
+
+  """The work’s title (up to 120 characters)."""
+  title: String
+
+  """When it last changed."""
+  updatedAt: DateTime!
+
+  """
+  Increases with every write. Send it back with saves and status changes.
+  """
+  version: Int!
+
+  """Length in words (500 to 120,000)."""
+  wordCount: Int
+}
+
+"""Where a submission is in the editorial workflow."""
+enum SubmissionStatus {
+  """Accepted with a release date; only a few fields stay editable."""
+  ACCEPTED
+
+  """Declined with a note; the author may revise it into a new draft."""
+  DECLINED
+
+  """Being prepared by its author; only the author can see it."""
+  DRAFT
+
+  """Claimed by an editor, who alone may decide it."""
+  IN_REVIEW
+
+  """Sent to the press and waiting for an editor to claim it."""
+  SUBMITTED
+}
+
+"""The file is empty, larger than 5 MB, or neither a PDF nor UTF-8 text."""
+type UploadRejectedError implements Error {
+  """A sentence for the person using the app."""
+  message: String!
+}
+
+"""An account: an author or an editor."""
+type User {
+  """
+  Sign-in email address. Shown only to the account itself, and to editors for authors; null otherwise.
+  """
+  email: String
+
+  """Stable identifier."""
+  id: ID!
+
+  """Display name."""
+  name: String!
+
+  """What the account may do."""
+  role: Role!
+}
+
+"""Input failed the shared validation rules."""
+type ValidationError implements Error {
+  """A sentence for the person using the app."""
+  message: String!
+
+  """Each invalid field and why."""
+  problems: [FieldProblem!]!
+}
+
+"""
+A status change the workflow allows. See `Submission.availableActions`.
+"""
+enum WorkflowAction {
+  """Claiming editor: accept with a release date."""
+  ACCEPT
+
+  """Editor: take a waiting submission into review."""
+  CLAIM
+
+  """Claiming editor: decline with a note for the author."""
+  DECLINE
+
+  """Author: turn a declined submission back into a draft."""
+  REVISE
+
+  """Author: send a complete draft to the press."""
+  SUBMIT
+
+  """Author: take a waiting submission back to draft."""
+  WITHDRAW
+}
