@@ -1,0 +1,43 @@
+name: Bug report
+description: Something does not work as documented.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Please do not include real personal data or secrets. Security problems go to the private reporting form instead (see SECURITY.md).
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Starting from a fresh `npm run db:setup`, with the demo account you used.
+      placeholder: |
+        1. Sign in as Wren (author)
+        2. …
+    validations:
+      required: true
+  - type: input
+    id: feature
+    attributes:
+      label: Feature ID
+      description: From docs/reference/features.md, if you know it (for example F-04).
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Node version, Postgres version, browser and operating system; Docker Compose or npm run dev.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Server log lines (JSON) or browser console output, with anything sensitive removed.
+      render: text
