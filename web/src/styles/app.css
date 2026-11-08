@@ -1,0 +1,488 @@
+/* Wide screens: introduction and points on the left, sign-in on the right.
+   Narrow screens: introduction, sign-in, then points (the DOM order). */
+.landing {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(320px, 1fr);
+  grid-template-areas:
+    'intro signin'
+    'points signin';
+  gap: var(--space-6) var(--space-8);
+  align-items: start;
+}
+
+.landing-intro {
+  grid-area: intro;
+}
+
+.signin {
+  grid-area: signin;
+}
+
+.eyebrow {
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hero {
+  max-width: 18ch;
+  font-size: clamp(var(--text-2xl), 5vw, var(--text-4xl));
+}
+
+.lede {
+  max-width: 60ch;
+  font-size: var(--text-lg);
+}
+
+.points {
+  grid-area: points;
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.points h2 {
+  margin: var(--space-2) 0 var(--space-1);
+  font-size: var(--text-lg);
+}
+
+.point-icon {
+  color: var(--color-primary);
+}
+
+.signin h3 {
+  font-size: var(--text-base);
+}
+
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Phones: title and details on a full line, then status and actions.
+   Wider screens: one line of title, status and actions. */
+.list-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+}
+
+.list-main {
+  display: grid;
+  flex: 1 1 100%;
+}
+
+@media (min-width: 600px) {
+  .list-main {
+    flex-basis: 0;
+    min-width: 0;
+  }
+}
+
+.list-title {
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.list-title:hover {
+  text-decoration: underline;
+}
+
+.page-head.with-status {
+  justify-content: flex-start;
+}
+
+.inbox-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.inbox-heading .badge {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.queue-more {
+  justify-self: center;
+}
+
+.message-body {
+  white-space: pre-wrap;
+}
+
+.wizard {
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+  max-width: 860px;
+}
+
+.stepper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+
+.stepper li > a,
+.stepper li > span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: var(--text-md);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.stepper li.current > a {
+  border-color: var(--color-primary);
+  color: var(--color-text);
+}
+
+.stepper-dot {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-sunken);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.stepper li.current .stepper-dot,
+.stepper li.done .stepper-dot {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+/* Phones: numbered dots joined by a line; the page heading names the current step,
+   and each dot keeps its step name for screen readers. */
+@media (max-width: 599px) {
+  .stepper {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0;
+  }
+
+  .stepper li {
+    display: flex;
+    flex: 1 1 0;
+    align-items: center;
+  }
+
+  .stepper li:last-child {
+    flex: 0 0 auto;
+  }
+
+  .stepper li:not(:last-child)::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    margin: 0 var(--space-1);
+    border-radius: 1px;
+    background: var(--color-border);
+  }
+
+  .stepper li.done:not(:last-child)::after {
+    background: var(--color-primary);
+  }
+
+  .stepper li > a,
+  .stepper li > span {
+    padding: 5px;
+  }
+
+  .stepper-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
+.k-textarea.prose {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+}
+
+.k-textarea.short {
+  min-height: 100px;
+}
+
+.k-input.narrow {
+  max-width: 220px;
+}
+
+.choice-group {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+}
+
+.choice-group legend {
+  padding: 0 var(--space-1);
+  font-weight: 700;
+}
+
+/* The whole label is the target: at least 32px tall, the control aligned with its first line. */
+.choice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-height: 32px;
+  padding-block: var(--space-1);
+  cursor: pointer;
+}
+
+.choice input {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: var(--color-primary);
+}
+
+.step-actions {
+  justify-content: flex-end;
+  padding-top: var(--space-2);
+}
+
+.file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 400;
+}
+
+.upload-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.ready {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-success);
+  font-weight: 700;
+}
+
+.checklist {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-inline-start: 4px solid var(--color-warning);
+  border-radius: var(--radius-card);
+  background: var(--color-sunken);
+}
+
+.checklist h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-warning);
+  font-size: var(--text-lg);
+}
+
+.checklist ul {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checklist li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.fix-link {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  font-size: var(--text-md);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.fix-link:hover {
+  background: var(--color-primary-soft);
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--space-2) var(--space-6);
+  margin: 0;
+}
+
+.summary dt {
+  color: var(--color-text-muted);
+  font-weight: 700;
+}
+
+.summary dd {
+  margin: 0;
+}
+
+.lock-button {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.lock-reason {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.lock-reason[hidden] {
+  display: none;
+}
+
+.decision-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.leave-guard {
+  width: min(460px, calc(100vw - var(--space-8)));
+  margin: auto;
+  border-radius: var(--radius-dialog);
+  color: var(--color-text);
+  box-shadow: var(--shadow-2);
+}
+
+.leave-guard[open] {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.leave-guard::backdrop {
+  background: var(--color-overlay);
+}
+
+@media (max-width: 479px) {
+  .leave-guard .k-button {
+    flex: 1 1 100%;
+  }
+}
+
+/* Headings receive focus after navigation only so screen readers start there. */
+#main h1:focus,
+#main:focus {
+  outline: none;
+}
+
+@media (max-width: 860px) {
+  .landing {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'intro'
+      'signin'
+      'points';
+  }
+
+  .decision-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 600px) and (max-width: 860px) {
+  .points {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Phones: each label sits above its value, with more space between pairs than within one. */
+@media (max-width: 599px) {
+  .summary {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0 var(--space-6);
+  }
+
+  .summary dt {
+    font-size: var(--text-sm);
+  }
+
+  .summary dd {
+    margin-bottom: var(--space-3);
+  }
+
+  .summary dd:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.badge {
+  border-radius: var(--radius-pill);
+  padding: 0 var(--space-2);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.unread::before {
+  content: '';
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-inline-end: var(--space-2);
+  border-radius: 50%;
+  background: var(--color-accent);
+  vertical-align: middle;
+}

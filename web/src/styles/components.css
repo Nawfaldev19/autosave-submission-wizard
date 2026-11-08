@@ -1,0 +1,429 @@
+/* Shared component styles. Class names are prefixed "k-" (kit). */
+
+.k-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.k-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 56px;
+  /* Lines the header's contents up with the page's content column (.k-main). */
+  padding: 0 max(var(--space-4), calc((100% - var(--content-max)) / 2 + var(--space-4)));
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.k-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.k-brand svg {
+  width: 28px;
+  height: 28px;
+}
+
+.k-brand-sub {
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 400;
+}
+
+.k-header-end {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.k-user {
+  display: grid;
+  min-width: 0;
+  margin-inline-end: var(--space-1);
+  line-height: 1.25;
+  text-align: end;
+}
+
+.k-user-name,
+.k-user-role {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.k-user-name {
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.k-user-role {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+/* Phones: drop the press name and keep Sign out as an icon, so the header fits in 320px. */
+@media (max-width: 599px) {
+  .k-brand-sub {
+    display: none;
+  }
+}
+
+@media (max-width: 479px) {
+  .k-header {
+    gap: var(--space-2);
+  }
+
+  .k-header .k-button {
+    padding: 0 var(--space-2);
+    min-width: 40px;
+  }
+
+  .k-header-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
+.k-main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-12);
+}
+
+.k-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 38px;
+  padding: 0 var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  font-size: var(--text-md);
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background var(--duration-micro) var(--ease-standard),
+    transform var(--duration-micro) var(--ease-standard);
+}
+
+.k-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.k-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.k-button-primary {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.k-button-primary:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.k-button-secondary {
+  background: var(--color-surface);
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.k-button-secondary:hover:not(:disabled),
+.k-button-ghost:hover:not(:disabled) {
+  background: var(--color-sunken);
+}
+
+.k-button-ghost {
+  background: transparent;
+  color: var(--color-text);
+}
+
+.k-button-danger {
+  background: transparent;
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.k-button-danger:hover:not(:disabled) {
+  background: var(--color-danger-soft);
+}
+
+.k-field {
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.k-input,
+.k-textarea,
+.k-select {
+  width: 100%;
+  min-height: 40px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  font-size: var(--text-base);
+  font-weight: 400;
+}
+
+.k-textarea {
+  min-height: 160px;
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  resize: vertical;
+}
+
+.k-input[type='file'] {
+  padding: var(--space-1);
+}
+
+.k-input::file-selector-button {
+  min-height: 32px;
+  margin-inline-end: var(--space-3);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-sunken);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-md);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.k-input[aria-invalid='true'],
+.k-textarea[aria-invalid='true'],
+.k-select[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
+.k-field-error {
+  color: var(--color-danger);
+  font-weight: 400;
+}
+
+.k-field-hint {
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.k-card {
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-1);
+}
+
+@media (max-width: 479px) {
+  .k-card {
+    padding: var(--space-4);
+  }
+}
+
+/* A link that stands on its own line ("← Review queue"): a full-height tap target. */
+.k-link-block {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 32px;
+}
+
+/* A group of toggle buttons (aria-pressed) where exactly one is on. */
+.k-segmented {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-self: start;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: calc(var(--radius-control) + var(--space-1));
+  background: var(--color-sunken);
+}
+
+.k-segmented .k-button {
+  min-height: 34px;
+  padding: 0 var(--space-3);
+  color: var(--color-text-muted);
+}
+
+.k-segmented .k-button:hover:not(:disabled) {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.k-segmented .k-button[aria-pressed='true'] {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-1);
+}
+
+@media (max-width: 479px) {
+  .k-segmented {
+    display: flex;
+    justify-self: stretch;
+  }
+
+  .k-segmented .k-button {
+    flex: 1 1 0;
+    padding: 0 var(--space-2);
+  }
+}
+
+.k-notice {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-control);
+  border: 1px solid var(--color-border);
+  background: var(--color-sunken);
+  font-size: var(--text-md);
+}
+
+.k-notice-error {
+  border-color: var(--color-danger);
+  background: var(--color-danger-soft);
+}
+
+.k-notice-success {
+  border-color: var(--color-success);
+}
+
+.k-notice svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.k-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-0-5) var(--space-2);
+  border-radius: var(--radius-pill);
+  border: 1px solid currentColor;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.k-pill-success {
+  color: var(--color-success);
+}
+
+.k-pill-warning {
+  color: var(--color-warning);
+}
+
+.k-pill-danger {
+  color: var(--color-danger);
+}
+
+.k-pill-info {
+  color: var(--color-info);
+}
+
+.k-pill-muted {
+  color: var(--color-text-muted);
+}
+
+.k-skeleton {
+  border-radius: var(--radius-control);
+  background: linear-gradient(
+    90deg,
+    var(--color-sunken) 0%,
+    var(--color-border) 50%,
+    var(--color-sunken) 100%
+  );
+  background-size: 200% 100%;
+  animation: k-shimmer 1.4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .k-skeleton {
+    animation: none;
+  }
+}
+
+@keyframes k-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.k-empty {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  padding: var(--space-12) var(--space-4);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.k-empty h1,
+.k-empty h2 {
+  color: var(--color-text);
+  font-size: var(--text-lg);
+}
+
+.k-page-title {
+  font-size: var(--text-2xl);
+}
+
+/* Phones: a step down, so long titles ("Step 5 of 5: Review and submit") take fewer lines. */
+@media (max-width: 479px) {
+  .k-page-title {
+    font-size: var(--text-xl);
+  }
+}
+
+.k-muted {
+  color: var(--color-text-muted);
+}
+
+.k-mono {
+  font-family: var(--font-mono);
+}
+
+.k-stack {
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+}
+
+.k-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.k-survey {
+  background-image: radial-gradient(var(--color-grid) 1.2px, transparent 1.2px);
+  background-size: 20px 20px;
+}
