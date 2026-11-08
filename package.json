@@ -1,0 +1,51 @@
+{
+  "name": "submission-wizard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A multi-step submission wizard that saves on each step, with an editorial review queue for a small press.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": "^22.12.0 || >=24.0.0"
+  },
+  "workspaces": [
+    "shared",
+    "server",
+    "web"
+  ],
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^24.19.2",
+    "@vitejs/plugin-react": "^6.1.2",
+    "@vitest/browser": "^5.0.5",
+    "@vitest/browser-playwright": "^5.0.5",
+    "@vitest/coverage-v8": "^5.0.5",
+    "eslint": "^10.13.0",
+    "eslint-plugin-jsdoc": "^65.0.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "globals": "^17.13.0",
+    "knip": "^6.41.0",
+    "playwright": "^1.64.1",
+    "prettier": "^3.9.10",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.2",
+    "vitest": "^5.0.5"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "codegen": "npm run codegen --workspace @submission-wizard/web",
+    "db:setup": "npm run seed --workspace @submission-wizard/server",
+    "lint": "eslint . --max-warnings 0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc -p shared/tsconfig.json && tsc -p server/tsconfig.json && tsc -p web/tsconfig.json && tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "build": "npm run build --workspace @submission-wizard/web",
+    "test:e2e": "playwright test",
+    "verify": "npm run lint && npm run knip && npm run format:check && npm run typecheck && npm run test:coverage && npm run test:e2e",
+    "knip": "knip"
+  }
+}

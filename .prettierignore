@@ -1,0 +1,12 @@
+dist
+**/dist
+coverage
+playwright-report
+test-results
+package-lock.json
+web/src/gql
+**/storage
+server/.test-storage
+.vitest
+server/.e2e-storage
+server/schema.graphql

@@ -1,0 +1,7 @@
+* text=auto eol=lf
+
+*.png binary
+
+package-lock.json linguist-generated=true
+server/schema.graphql linguist-generated=true
+web/src/gql/** linguist-generated=true

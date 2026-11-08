@@ -1,0 +1,33 @@
+# Dependencies and build output
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Test and coverage output
+coverage/
+.vitest/
+playwright-report/
+test-results/
+
+# Uploaded manuscripts (development, tests and end-to-end runs)
+**/storage/
+server/.test-storage/
+server/.e2e-storage/
+.e2e-storage/
+
+# Supply-chain reports produced by CI
+sbom.cdx.json
+*.sarif
+results.sarif
+
+# Logs
+*.log
+npm-debug.log*
+
+# Local environment and editor files
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+.DS_Store
