@@ -1,0 +1,70 @@
+# One command to run everything:  docker compose up
+#   app   http://localhost:5180   (Vite dev server, proxies /graphql and /manuscripts)
+#   api   http://localhost:4400/healthz   (answers "ok" once the database does)
+# Demo password for every seeded account: submission-wizard-demo-pass
+#
+# Packages are installed once, by the `deps` service, into named volumes. The
+# source is bind-mounted, but node_modules folders never are, so the host's own
+# installation is left alone.
+
+x-node: &node
+  image: node:24-alpine
+  working_dir: /app
+  volumes:
+    - .:/app
+    - modules:/app/node_modules
+    - web-modules:/app/web/node_modules
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: submission_wizard
+      POSTGRES_PASSWORD: submission_wizard
+      POSTGRES_DB: submission_wizard
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U submission_wizard']
+      interval: 2s
+      retries: 30
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  deps:
+    <<: *node
+    command: npm ci --no-audit --no-fund
+
+  server:
+    <<: *node
+    command: sh -c "npm run seed --workspace @submission-wizard/server -- --if-empty && npm run start --workspace @submission-wizard/server"
+    environment:
+      DATABASE_URL: postgres://submission_wizard:submission_wizard@db:5432/submission_wizard
+      SESSION_SECRET: change-me-for-anything-but-a-local-demo
+      ALLOWED_ORIGINS: http://localhost:5180
+      STORAGE_DIR: /app/server/storage
+    ports:
+      - '4400:4400'
+    depends_on:
+      db:
+        condition: service_healthy
+      deps:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:4400/healthz']
+      interval: 5s
+      retries: 60
+
+  web:
+    <<: *node
+    command: sh -c "npm run dev --workspace @submission-wizard/web -- --host 0.0.0.0"
+    environment:
+      SUBMISSION_WIZARD_API_URL: http://server:4400
+    ports:
+      - '5180:5180'
+    depends_on:
+      server:
+        condition: service_healthy
+
+volumes:
+  db-data:
+  modules:
+  web-modules:
